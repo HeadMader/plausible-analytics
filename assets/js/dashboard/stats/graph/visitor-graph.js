@@ -14,6 +14,7 @@ import LineGraphWithRouter from './line-graph'
 import { useQueryContext } from '../../query-context'
 import { useSiteContext } from '../../site-context'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { Tooltip } from '../../util/tooltip'
 
 function fetchTopStats(site, query) {
   const q = { ...query }
@@ -44,6 +45,7 @@ export default function VisitorGraph({ updateImportedDataInView }) {
   const [topStatsLoading, setTopStatsLoading] = useState(true)
   const [graphData, setGraphData] = useState(null)
   const [graphLoading, setGraphLoading] = useState(true)
+  const [showGraph, setShowGraph] = useState(true)
 
   // This state is explicitly meant for the situation where either graph interval
   // or graph metric is changed. That results in behaviour where Top Stats stay
@@ -179,6 +181,40 @@ export default function VisitorGraph({ updateImportedDataInView }) {
     >
       {(topStatsLoading || graphLoading) && renderLoader()}
       <FadeIn show={!(topStatsLoading || graphLoading)}>
+        <div className="flex justify-end p-2 absolute top-0 right-0 z-9">
+          <Tooltip info={<div>
+                      <p className="whitespace-nowrap text-small">
+                       {showGraph ? 'Hide Graph' : 'Show Graph'}
+                      </p>
+                    </div>}>
+            <button
+              className="text-sm px-3 py-1 border rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+              onClick={() => setShowGraph((prev) => !prev)}
+            >
+              {showGraph ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e8eaed"
+                >
+                  <path d="M73-889 889-73l-57 57-104-104H200q-33 0-56.5-23.5T120-200v-528L16-832l57-57Zm287 447L200-282v82h448L544-304l-22 24-162-162ZM200-648v252l126-126-126-126Zm36-192h524q33 0 56.5 23.5T840-760v524l-80-80v-234L650-426l-57-57 167-187v-90H316l-80-80Zm357 357Zm-158 70ZM326-522Zm34 80Zm176-98Z" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e8eaed"
+                >
+                  <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-162v82h560v-350L522-280 360-442 200-282Zm0-114 160-160 158 158 242-272v-90H200v364Zm0-154v-120 272-158 274-160 162-270Zm0 154v-364 362-158 160Zm0 114v-160 162-270 350-82Z" />
+                </svg>
+              )}
+            </button>
+          </Tooltip>
+        </div>
         <div
           id="top-stats-container"
           className="flex flex-wrap"
@@ -192,28 +228,30 @@ export default function VisitorGraph({ updateImportedDataInView }) {
             tooltipBoundary={topStatsBoundary.current}
           />
         </div>
-        <div className="relative px-2">
-          {graphRefreshing && renderLoader()}
-          <div className="absolute right-4 -top-8 py-1 flex items-center">
-            {renderImportedIntervalUnsupportedWarning()}
-            {!isRealtime && <StatsExport />}
-            <SamplingNotice samplePercent={topStatData} />
-            {importedSwitchVisible() && (
-              <WithImportedSwitch
-                tooltipMessage={topStatData.with_imported_switch.tooltip_msg}
-                disabled={!topStatData.with_imported_switch.togglable}
-              />
-            )}
-            <IntervalPicker onIntervalUpdate={onIntervalUpdate} />
+        {showGraph && (
+          <div className="relative px-2">
+            {graphRefreshing && renderLoader()}
+            <div className="absolute right-4 -top-8 py-1 flex items-center">
+              {renderImportedIntervalUnsupportedWarning()}
+              {!isRealtime && <StatsExport />}
+              <SamplingNotice samplePercent={topStatData} />
+              {importedSwitchVisible() && (
+                <WithImportedSwitch
+                  tooltipMessage={topStatData.with_imported_switch.tooltip_msg}
+                  disabled={!topStatData.with_imported_switch.togglable}
+                />
+              )}
+              <IntervalPicker onIntervalUpdate={onIntervalUpdate} />
+            </div>
+            <LineGraphWithRouter
+              graphData={{
+                ...graphData,
+                interval: getCurrentInterval(site, query)
+              }}
+              darkTheme={isDarkTheme}
+            />
           </div>
-          <LineGraphWithRouter
-            graphData={{
-              ...graphData,
-              interval: getCurrentInterval(site, query)
-            }}
-            darkTheme={isDarkTheme}
-          />
-        </div>
+        )}
       </FadeIn>
     </div>
   )
