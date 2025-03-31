@@ -9,6 +9,8 @@ import Behaviours from './stats/behaviours'
 import { useQueryContext } from './query-context'
 import { isRealTimeDashboard } from './util/filters'
 import { Layout, Responsive, WidthProvider, ResizeHandle } from 'react-grid-layout'
+import * as storage from './util/storage'
+import { useSiteContext } from './site-context'
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -70,20 +72,6 @@ const generateLayouts = (): Layouts => {
   return layouts;
 };
 
-function getFromLS() {
-  if (typeof window === 'undefined') return null;
-  try {
-    return JSON.parse(window.localStorage.getItem("dashboard-layout") || "null");
-  } catch (_error) {
-    return null;
-  }
-}
-
-function saveToLS(layouts: Layouts) {
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem("dashboard-layout", JSON.stringify(layouts));
-  }
-}
 
 function DashboardStats({
   importedDataInView,
@@ -92,8 +80,26 @@ function DashboardStats({
   importedDataInView?: boolean
   updateImportedDataInView?: (v: boolean) => void
 }) {
+  const site = useSiteContext();
   const initialLayouts = getFromLS() || generateLayouts();
   const [layouts, setLayouts] = useState<Layouts>(initialLayouts);
+
+  function getFromLS() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const domainLayoutKey = storage.getDomainScopedStorageKey('dashboard-layout', site.domain);
+      return JSON.parse(storage.getItem(domainLayoutKey) || "null");
+    } catch (_error) {
+      return null;
+    }
+  }
+  
+  function saveToLS(layouts: Layouts) {
+    if (typeof window !== 'undefined') {
+      const domainLayoutKey = storage.getDomainScopedStorageKey('dashboard-layout', site.domain);
+      storage.setItem(domainLayoutKey, JSON.stringify(layouts));
+    }
+  }
 
   const onLayoutChange = (_currentLayout: Layout[], allLayouts: Layouts) => {
     setLayouts(allLayouts);

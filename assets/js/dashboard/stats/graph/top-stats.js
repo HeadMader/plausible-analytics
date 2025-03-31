@@ -173,7 +173,7 @@ export default function TopStats({
           <div>
             <span className="flex items-center justify-between whitespace-nowrap">
               <p
-                className="font-bold text-xl dark:text-gray-100"
+                className="font-bold text-4xl dark:text-gray-100"
                 id={stat.graph_metric}
               >
                 {topStatNumberShort(stat.graph_metric, stat.value)}
