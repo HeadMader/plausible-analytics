@@ -3,6 +3,7 @@ name: Build Public Images GHCR
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
