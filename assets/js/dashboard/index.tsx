@@ -9,6 +9,8 @@ import Behaviours from './stats/behaviours'
 import { useQueryContext } from './query-context'
 import { isRealTimeDashboard } from './util/filters'
 import { Layout, Responsive, WidthProvider, ResizeHandle } from 'react-grid-layout'
+import * as storage from './util/storage'
+import { useSiteContext } from './site-context'
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -25,11 +27,11 @@ type Layouts = {
 const availableResizers: ResizeHandle[] = ["se"];
 
 const breakpointsConfig: { [key in keyof Layouts]: { columns: number; width: number; height: number } } = {
-  lg: { columns: 2, width: 15, height: 15 },
-  md: { columns: 2, width: 8, height: 15 },
-  sm: { columns: 1, width: 16, height: 15 },
-  xs: { columns: 1, width: 12, height: 15 },
-  xxs: { columns: 1, width: 8, height: 15 },
+  lg: { columns: 2, width: 15, height: 13 },
+  md: { columns: 2, width: 8, height: 13 },
+  sm: { columns: 1, width: 16, height: 13 },
+  xs: { columns: 1, width: 12, height: 13 },
+  xxs: { columns: 1, width: 8, height: 13 },
 };
 
 interface ItemConfig {
@@ -77,9 +79,30 @@ function DashboardStats({
   importedDataInView?: boolean
   updateImportedDataInView?: (v: boolean) => void
 }) {
-  const [layouts, setLayouts] = useState<Layouts>(generateLayouts());
+  const site = useSiteContext();
+  const initialLayouts = getFromLS() || generateLayouts();
+  const [layouts, setLayouts] = useState<Layouts>(initialLayouts);
+
+  function getFromLS() {
+    if (typeof window === 'undefined') return null;
+    try {
+      const domainLayoutKey = storage.getDomainScopedStorageKey('dashboard-layout', site.domain);
+      return JSON.parse(storage.getItem(domainLayoutKey) || "null");
+    } catch (_error) {
+      return null;
+    }
+  }
+  
+  function saveToLS(layouts: Layouts) {
+    if (typeof window !== 'undefined') {
+      const domainLayoutKey = storage.getDomainScopedStorageKey('dashboard-layout', site.domain);
+      storage.setItem(domainLayoutKey, JSON.stringify(layouts));
+    }
+  }
+
   const onLayoutChange = (_currentLayout: Layout[], allLayouts: Layouts) => {
     setLayouts(allLayouts);
+    saveToLS(allLayouts);
     if (typeof updateImportedDataInView === 'function') {
       updateImportedDataInView(true);
     }
