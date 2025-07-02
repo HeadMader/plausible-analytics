@@ -3,13 +3,14 @@ name: Build Public Images GHCR
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  GHCR_REPO: ghcr.io/plausible/community-edition
+  GHCR_REPO: ghcr.io/headmader/plausible-analytics-ce
 
 jobs:
   build:
@@ -82,7 +83,7 @@ jobs:
           url: ${{ secrets.BUILD_NOTIFICATION_URL }}
           method: "POST"
           customHeaders: '{"Content-Type": "application/json"}'
-          data: '{"content": "<a href=\"https://github.com/plausible/analytics/actions/workflows/build-public-images-ghcr.yml\">Build failed</a>"}'
+          data: '{"content": "<a href=\"https://github.com/HeadMader/plausible-analytics/actions/workflows/build-public-images-ghcr.yml\">Build failed</a>"}'
 
   push:
     runs-on: ubuntu-latest
