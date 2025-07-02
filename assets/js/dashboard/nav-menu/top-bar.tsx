@@ -8,6 +8,7 @@ import { FilterMenu } from './filter-menu'
 import { FiltersBar } from './filters-bar'
 import { QueryPeriodsPicker } from './query-periods/query-periods-picker'
 import { SegmentMenu } from './segments/segment-menu'
+import { TimeIntervalPicker } from '../components/time-interval-picker'
 
 interface TopBarProps {
   showCurrentVisitors: boolean
@@ -32,8 +33,8 @@ function TopBarStickyWrapper({ children }: { children: ReactNode }) {
         className={classNames(
           'relative top-0 py-2 sm:py-3 z-10',
           !site.embedded &&
-            !inView &&
-            'sticky fullwidth-shadow bg-gray-50 dark:bg-gray-850'
+          !inView &&
+          'sticky fullwidth-shadow bg-gray-50 dark:bg-gray-850'
         )}
       >
         {children}
@@ -68,6 +69,7 @@ function TopBarInner({ showCurrentVisitors }: TopBarProps) {
         />
       </div>
       <div className="flex gap-x-4 shrink-0">
+        <TimeIntervalPicker />
         <FilterMenu />
         <SegmentMenu />
         <QueryPeriodsPicker />
