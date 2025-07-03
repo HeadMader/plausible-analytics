@@ -19,7 +19,7 @@ import { TabButton, TabWrapper } from '../../components/tabs'
 
 function Countries({ query, site, onClick, afterFetchData }) {
   function fetchData() {
-    return api.get(apiPath(site, '/countries'), query, { limit: 9 })
+    return api.get(apiPath(site, '/countries'), query, { limit: 15 })
   }
 
   function renderIcon(country) {
@@ -61,7 +61,7 @@ function Countries({ query, site, onClick, afterFetchData }) {
 
 function Regions({ query, site, onClick, afterFetchData }) {
   function fetchData() {
-    return api.get(apiPath(site, '/regions'), query, { limit: 9 })
+    return api.get(apiPath(site, '/regions'), query, { limit: 15 })
   }
 
   function renderIcon(region) {
@@ -100,7 +100,7 @@ function Regions({ query, site, onClick, afterFetchData }) {
 
 function Cities({ query, site, afterFetchData }) {
   function fetchData() {
-    return api.get(apiPath(site, '/cities'), query, { limit: 9 })
+    return api.get(apiPath(site, '/cities'), query, { limit: 15 })
   }
 
   function renderIcon(city) {
@@ -247,7 +247,7 @@ class Locations extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="h-full flex flex-col">
         <div className="w-full flex justify-between">
           <div className="flex gap-x-1">
             <h3 className="font-bold dark:text-gray-100">

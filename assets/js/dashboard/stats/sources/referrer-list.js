@@ -23,7 +23,7 @@ export default function Referrers({ source }) {
     return api.get(
       url.apiPath(site, `/referrers/${encodeURIComponent(source)}`),
       query,
-      { limit: 9 }
+      { limit: 15 }
     )
   }
 

@@ -148,7 +148,7 @@ const WorldMap = ({
     : undefined
 
   return (
-    <div className="flex flex-col relative" style={{ minHeight: MIN_HEIGHT }}>
+    <div className="flex flex-1 flex-col relative justify-between" style={{ minHeight: MIN_HEIGHT }}>
       <div className="mt-4" />
       <div
         className="relative mx-auto w-full"

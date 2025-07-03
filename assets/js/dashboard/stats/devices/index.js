@@ -432,8 +432,8 @@ export default function Devices() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between w-full">
+    <div className='h-full flex flex-col'>
+      <div className="w-full flex justify-between">
         <div className="flex gap-x-1">
           <h3 className="font-bold dark:text-gray-100">Devices</h3>
           <ImportedQueryUnsupportedWarning

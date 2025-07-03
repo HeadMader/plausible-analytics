@@ -15,5 +15,5 @@ export default function LazyLoader(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView])
 
-  return <div ref={ref}>{props.children}</div>
+  return <div ref={ref} className={props.className}>{props.children}</div>
 }

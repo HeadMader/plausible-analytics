@@ -27,24 +27,26 @@ type Layouts = {
 const availableResizers: ResizeHandle[] = ["se"];
 
 const breakpointsConfig: { [key in keyof Layouts]: { columns: number; width: number; height: number } } = {
-  lg: { columns: 2, width: 15, height: 13 },
-  md: { columns: 2, width: 8, height: 13 },
-  sm: { columns: 1, width: 16, height: 13 },
-  xs: { columns: 1, width: 12, height: 13 },
-  xxs: { columns: 1, width: 8, height: 13 },
+  lg: { columns: 2, width: 15, height: 18 },
+  md: { columns: 2, width: 12, height: 18 },
+  sm: { columns: 1, width: 24, height: 18 },
+  xs: { columns: 1, width: 12, height: 18 },
+  xxs: { columns: 1, width: 8, height: 18 },
 };
 
 interface ItemConfig {
   id: string;
   minW?: number;
   minH?: number;
+  maxH?: number;
 }
 
 const items: ItemConfig[] = [
-  { id: "sources", minW: 5, minH: 12 },
-  { id: "pages", minW: 5, minH: 12 },
-  { id: "locations", minW: 5, minH: 12 },
-  { id: "devices", minW: 5, minH: 12 },
+  { id: "sources", minW: 6, minH: 5, maxH: 20 },
+  { id: "pages", minW: 6, minH: 5, maxH: 20 },
+  { id: "locations", minW: 6, minH: 5, maxH: 20 },
+  { id: "devices", minW: 6, minH: 5, maxH: 20 },
+  { id: "behaviours", minW: 8, minH: 5, maxH: 20 } // Behaviours can take more space
 ];
 
 const generateLayouts = (): Layouts => {
@@ -65,6 +67,7 @@ const generateLayouts = (): Layouts => {
         h: config.height,
         minW: item.minW,
         minH: item.minH,
+        maxH: item.maxH,
         resizeHandles: availableResizers,
       };
     });
@@ -92,7 +95,7 @@ function DashboardStats({
       return null;
     }
   }
-  
+
   function saveToLS(layouts: Layouts) {
     if (typeof window !== 'undefined') {
       const domainLayoutKey = storage.getDomainScopedStorageKey('dashboard-layout', site.domain);
@@ -112,7 +115,7 @@ function DashboardStats({
     'relative p-4 flex flex-col bg-white dark:bg-gray-825 shadow-xl rounded'
 
   const dragHandleClass =
-    'drag-handle absolute top-0 left-0 right-0 h-5 rounded-t'
+    'drag-handle absolute top-0 left-0 right-0 h-5 rounded-t z-10'
 
   return (
     <>
@@ -121,7 +124,7 @@ function DashboardStats({
         className="styles.react-grid-layout layout relative"
         layouts={layouts}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 30, md: 16, sm: 16, xs: 12, xxs: 8 }}
+        cols={{ lg: 30, md: 24, sm: 24, xs: 12, xxs: 8 }}
         rowHeight={20}
         onLayoutChange={onLayoutChange}
         isDraggable={true}
@@ -146,8 +149,11 @@ function DashboardStats({
           <div className={dragHandleClass}></div>
           <Devices />
         </div>
+        <div key="behaviours">
+          <div className={dragHandleClass}></div>
+          <Behaviours importedDataInView={importedDataInView} />
+        </div>
       </ResponsiveGridLayout>
-      <Behaviours importedDataInView={importedDataInView} />
     </>
   )
 }

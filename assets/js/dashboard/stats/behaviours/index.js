@@ -346,8 +346,8 @@ export default function Behaviours({ importedDataInView }) {
   }
 
   return (
-    <div className="items-start justify-between block w-full md:flex relative">
-      <div className="w-full p-4 bg-white rounded shadow-xl dark:bg-gray-825">
+    <div className="items-start justify-between block w-full h-full md:flex relative">
+      <div className="w-full h-full p-4 bg-white rounded shadow-xl dark:bg-gray-825 flex flex-col">
         <div className="flex justify-between w-full">
           <div className="flex gap-x-1">
             <h3 className="font-bold dark:text-gray-100">

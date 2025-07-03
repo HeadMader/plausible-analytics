@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, ReactNode } from 'react'
+import React, { useState, useEffect, useCallback, ReactNode, useRef } from 'react'
 import { AppNavigationLinkProps } from '../../navigation/use-app-navigate'
 import FlipMove from 'react-flip-move'
 
@@ -16,9 +16,9 @@ import { Metric } from './metrics'
 import { DrilldownLink, FilterInfo } from '../../components/drilldown-link'
 import { BreakdownResultMeta } from '../../query'
 
-const MAX_ITEMS = 9
+const MAX_ITEMS = 15
 export const MIN_HEIGHT = 380
-const ROW_HEIGHT = 32
+const ROW_HEIGHT = 40
 const ROW_GAP_HEIGHT = 4
 const DATA_CONTAINER_HEIGHT =
   (ROW_HEIGHT + ROW_GAP_HEIGHT) * (MAX_ITEMS - 1) + ROW_HEIGHT
@@ -129,6 +129,8 @@ export default function ListReport<
     meta: BreakdownResultMeta | null
   }>({ loading: true, list: null, meta: null })
   const [visible, setVisible] = useState(false)
+  const [maxItems, setMaxItems] = useState(MAX_ITEMS)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const isRealtime = isRealTimeDashboard(query)
   const goalFilterApplied = hasConversionGoalFilter(query)
@@ -150,6 +152,38 @@ export default function ListReport<
   const onVisible = () => {
     setVisible(true)
   }
+
+  const calculateMaxItems = useCallback(() => {
+    if (containerRef.current) {
+      const containerHeight = containerRef.current.clientHeight
+      const headerHeight = ROW_HEIGHT
+      const details = 24
+      const availableHeight = containerHeight - headerHeight - details + 4 // +4 to account for the gap between header and first row
+      const itemsCount = Math.floor(availableHeight / (ROW_HEIGHT + ROW_GAP_HEIGHT))
+      setMaxItems(Math.max(1, Math.min(itemsCount, MAX_ITEMS))) // At least 1, at most MAX_ITEMS
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!state.loading && state.list) {
+      // Use setTimeout to ensure the DOM has been updated
+      setTimeout(() => {
+        calculateMaxItems()
+        
+        const resizeObserver = new ResizeObserver(() => {
+          calculateMaxItems()
+        })
+        
+        if (containerRef.current) {
+          resizeObserver.observe(containerRef.current)
+        }
+        
+        return () => {
+          resizeObserver.disconnect()
+        }
+      }, 0)
+    }
+  }, [state.loading, state.list, calculateMaxItems])
 
   useEffect(() => {
     if (isRealtime) {
@@ -197,25 +231,27 @@ export default function ListReport<
   function renderReport() {
     if (state.list && state.list.length > 0) {
       return (
-        <div className="h-full flex flex-col">
-          <div style={{ height: ROW_HEIGHT }}>{renderReportHeader()}</div>
+        <div className="h-full flex flex-col" ref={containerRef}>
+          <div style={{ minHeight: ROW_HEIGHT, height: ROW_HEIGHT }}>{renderReportHeader()}</div>
 
-          <div style={{ minHeight: DATA_CONTAINER_HEIGHT }}>
-            <FlipMove className="flex-grow">
-              {state.list.slice(0, MAX_ITEMS).map(renderRow)}
-            </FlipMove>
+          <div className="flex-1 flex flex-col overflow-hidden justify-between !text-lg">
+            <div className='relative'>
+              <FlipMove className="flex-grow h-full w-full !absolute">
+                {state.list.slice(0, maxItems).map(renderRow)}
+              </FlipMove>
+            </div>
+
+            {!!detailsLinkProps &&
+              !state.loading &&
+              !(maybeHideDetails && !(state.list.length >= maxItems)) && (
+                <MoreLink
+                  onClick={undefined}
+                  className={'mt-2'}
+                  linkProps={detailsLinkProps}
+                  list={state.list}
+                />
+              )}
           </div>
-
-          {!!detailsLinkProps &&
-            !state.loading &&
-            !(maybeHideDetails && !(state.list.length >= MAX_ITEMS)) && (
-              <MoreLink
-                onClick={undefined}
-                className={'mt-2'}
-                linkProps={detailsLinkProps}
-                list={state.list}
-              />
-            )}
         </div>
       )
     }
@@ -267,7 +303,7 @@ export default function ListReport<
           bg={`${lightBackground} dark:bg-gray-500 dark:bg-opacity-15`}
           plot={metricToPlot}
         >
-          <div className="flex justify-start px-2 py-1.5 group text-sm dark:text-gray-300 relative z-9 break-all w-full">
+          <div className="flex justify-start px-2 py-1.5 group text-md dark:text-gray-300 relative z-9 break-all w-full">
             <DrilldownLink
               filterInfo={getFilterInfo(listItem)}
               onClick={onClick}
@@ -303,7 +339,7 @@ export default function ListReport<
           className={`text-right ${hiddenOnMobileClass(metric)}`}
           style={{ width: colMinWidth, minWidth: colMinWidth }}
         >
-          <span className="font-medium text-sm dark:text-gray-200 text-right">
+          <span className="font-medium text-lg dark:text-gray-200 text-right">
             {metric.renderValue(listItem, state.meta)}
           </span>
         </div>
@@ -315,7 +351,6 @@ export default function ListReport<
     return (
       <div
         className="w-full flex flex-col justify-center"
-        style={{ minHeight: `${MIN_HEIGHT}px` }}
       >
         <div className="mx-auto loading">
           <div></div>
@@ -328,7 +363,6 @@ export default function ListReport<
     return (
       <div
         className="w-full h-full flex flex-col justify-center"
-        style={{ minHeight: `${MIN_HEIGHT}px` }}
       >
         <div className="mx-auto font-medium text-gray-500 dark:text-gray-400">
           No data yet
@@ -338,8 +372,8 @@ export default function ListReport<
   }
 
   return (
-    <LazyLoader onVisible={onVisible}>
-      <div className="w-full" style={{ minHeight: `${MIN_HEIGHT}px` }}>
+    <LazyLoader onVisible={onVisible} className="flex-1">
+      <div className="w-full h-full flex-1">
         {state.loading && renderLoading()}
         {!state.loading && (
           <FadeIn show={!state.loading} className="h-full">

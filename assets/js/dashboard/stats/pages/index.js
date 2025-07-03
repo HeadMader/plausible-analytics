@@ -16,7 +16,7 @@ function EntryPages({ afterFetchData }) {
   const { query } = useQueryContext()
   const site = useSiteContext()
   function fetchData() {
-    return api.get(url.apiPath(site, '/entry-pages'), query, { limit: 9 })
+    return api.get(url.apiPath(site, '/entry-pages'), query, { limit: 15 })
   }
 
   function getExternalLinkUrl(page) {
@@ -62,7 +62,7 @@ function ExitPages({ afterFetchData }) {
   const site = useSiteContext()
   const { query } = useQueryContext()
   function fetchData() {
-    return api.get(url.apiPath(site, '/exit-pages'), query, { limit: 9 })
+    return api.get(url.apiPath(site, '/exit-pages'), query, { limit: 15 })
   }
 
   function getExternalLinkUrl(page) {
@@ -108,7 +108,7 @@ function TopPages({ afterFetchData }) {
   const { query } = useQueryContext()
   const site = useSiteContext()
   function fetchData() {
-    return api.get(url.apiPath(site, '/pages'), query, { limit: 9 })
+    return api.get(url.apiPath(site, '/pages'), query, { limit: 15 })
   }
 
   function getExternalLinkUrl(page) {
@@ -187,7 +187,7 @@ export default function Pages() {
   }
 
   return (
-    <div>
+    <div className='h-full flex flex-col'>
       {/* Header Container */}
       <div className="w-full flex justify-between">
         <div className="flex gap-x-1">
